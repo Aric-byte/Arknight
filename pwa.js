@@ -29,6 +29,8 @@
   // 离线缓存只能在 https 或 localhost 下工作，直接双击打开文件时跳过
   if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
   const hadController = !!navigator.serviceWorker.controller;  // 首次访问时没有，不需要刷新
+  // 每次打开都让 SW 补齐缺的图片（网络不稳时一次下不全）
+  navigator.serviceWorker.ready.then(reg => setTimeout(() => reg.active?.postMessage('fill'), 3000)).catch(() => {});
   navigator.serviceWorker.register('sw.js').then(reg => {
     const ask = w => {
       if (!w || !hadController) return;

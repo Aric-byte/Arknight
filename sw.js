@@ -1,5 +1,5 @@
 // 由 scripts/build_pwa.py 生成，不要直接改 sw.js
-const VERSION = '77c98b0daa';
+const VERSION = '2af438acf5';
 const CACHE = 'guicheng-' + VERSION;
 const FONT_CACHE = 'guicheng-fonts';
 const FILES = [
@@ -300,14 +300,15 @@ async function fetchInto(cache, u, tries = 3) {
       clearTimeout(t);
       if (r.ok) { await cache.put(u, r); return true; }
     } catch { /* 重试 */ }
+    await new Promise(r => setTimeout(r, 1500 * (i + 1)));   // 稍等再试，避免连续撞上断线
   }
   return false;
 }
-// 图片并发下载（6 路），失败的忽略，之后打开页面时会再补
+// 图片并发下载（4 路），失败的忽略，之后打开页面时会再补
 async function fillMedia(cache) {
   const queue = [...MEDIA];
   const worker = async () => { while (queue.length) await fetchInto(cache, queue.shift()); };
-  await Promise.all(Array.from({ length: 6 }, worker));
+  await Promise.all(Array.from({ length: 4 }, worker));
 }
 
 self.addEventListener('install', e => {
@@ -336,7 +337,15 @@ self.addEventListener('activate', e => {
   })());
 });
 
-self.addEventListener('message', e => { if (e.data === 'skipWaiting') self.skipWaiting(); });
+// 页面每次打开都会发 'fill'：把上次网络不好没下到的图片补上（已缓存的会跳过）
+let filling = null;
+self.addEventListener('message', e => {
+  if (e.data === 'skipWaiting') self.skipWaiting();
+  if (e.data === 'fill') {
+    filling ||= caches.open(CACHE).then(fillMedia).finally(() => { filling = null; });
+    e.waitUntil(filling);
+  }
+});
 
 self.addEventListener('fetch', e => {
   const req = e.request;
