@@ -390,3 +390,21 @@ body.dragging, body.dragging * { -webkit-user-select: none !important; user-sele
 .eq-card .eq-eff { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12px; }
 .modal-box { width: min(640px, 100%); }
 .modal-box .tier-row { margin-top: 8px; }
+
+/* 手机：格子小时棋子只显示头像和朝向，名字/阶数/装备角标隐藏 */
+.board.compact .token .nm, .board.compact .token .eqs { display: none; }
+.board.compact .token .tb { font-size: 8px; line-height: 10px; padding: 0 2px; }
+/* 手机顶栏一行放下：隐藏副标题文字，安装按钮缩小 */
+@media (max-width: 560px) {
+  .brand { padding-right: 10px; }
+  .brand-text { display: none; }
+  .topbar { flex-wrap: nowrap; }
+  .tab { padding: 8px 10px; }
+  #btn-install { padding: 3px 8px; font-size: 12px; white-space: nowrap; }
+}
+
+/* 预设：导入导出、站位标记 */
+.io-row { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.io-row .hint { flex: 1; min-width: 0; font-size: 12px; margin: 0; }
+.preset-row .pmeta { margin-left: 8px; font-size: 11px; font-weight: 600; color: var(--muted); }
+@media (max-width: 560px) { .io-row { flex-wrap: wrap; } .io-row .hint { flex-basis: 100%; } }

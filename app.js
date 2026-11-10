@@ -479,7 +479,9 @@
     const board = $('#board'), wrap = board.parentElement;
     const cols = +board.style.getPropertyValue('--cols') || 9;
     const avail = wrap.clientWidth - 20 - 3 * (cols - 1) - 2;
-    board.style.setProperty('--cell', Math.max(28, Math.min(84, Math.floor(avail / cols))) + 'px');
+    const cell = Math.max(28, Math.min(84, Math.floor(avail / cols)));
+    board.style.setProperty('--cell', cell + 'px');
+    board.classList.toggle('compact', cell < 52);   // 格子太小时只显示头像
   }
   window.addEventListener('resize', () => { if (state.view === 'deploy') sizeBoard(); });
 

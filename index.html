@@ -13,7 +13,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="assets/app/icon-192.png">
 <link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap">
+<!-- 字体异步加载：国内访问 Google 字体慢或失败时不阻塞页面，退回系统字体 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
