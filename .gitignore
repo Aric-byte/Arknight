@@ -1,0 +1,7 @@
+__pycache__/
+*.log
+raw.txt
+images.tsv
+missing.txt
+levels/
+img/
