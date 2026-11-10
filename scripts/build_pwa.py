@@ -38,6 +38,7 @@ h = hashlib.sha1()
 for f in files:
     if f != './':
         h.update(f.encode()); h.update((ROOT / f).read_bytes())
+h.update((ROOT / 'scripts' / 'sw.template.js').read_bytes())   # 缓存逻辑变了也要换版本
 version = h.hexdigest()[:10]
 
 tpl = (ROOT / 'scripts' / 'sw.template.js').read_text(encoding='utf-8')
