@@ -1,5 +1,5 @@
 // 由 scripts/build_pwa.py 生成，不要直接改 sw.js
-const VERSION = '661656105b';
+const VERSION = '77c98b0daa';
 const CACHE = 'guicheng-' + VERSION;
 const FONT_CACHE = 'guicheng-fonts';
 const FILES = [
@@ -323,8 +323,7 @@ self.addEventListener('install', e => {
       }
     }
     const ok = await Promise.all(CORE.map(u => fetchInto(cache, u, 4)));
-    if (ok.includes(false)) throw new Error('核心文件下载失败');   // 核心文件必须齐全
-    await fillMedia(cache);
+    if (ok.includes(false)) throw new Error('核心文件下载失败');   // 核心文件必须齐全；图片在激活后再补
   })());
 });
 
@@ -333,7 +332,7 @@ self.addEventListener('activate', e => {
     const keys = await caches.keys();
     await Promise.all(keys.filter(k => k.startsWith('guicheng-') && k !== CACHE && k !== FONT_CACHE).map(k => caches.delete(k)));
     await self.clients.claim();
-    await fillMedia(await caches.open(CACHE));   // 安装时没下到的图片再补一次
+    await fillMedia(await caches.open(CACHE));   // 激活后在后台下载全部图片
   })());
 });
 
