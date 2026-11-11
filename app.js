@@ -53,7 +53,7 @@
       state.bench = (s.bench || []).filter(ok);
       state.elite = new Set((s.elite || []).filter(ok));
       state.cap = s.cap || CAP_DEFAULT;
-      state.bannedPacts = new Set((s.banned || []).filter(n => PACT[n]));
+      state.bannedPacts = new Set((s.banned || []).filter(n => PACT[n]?.type === 'core'));
       state.equips = cleanEquips(s.equips);
     }
     state.filters.hideBanned = store.get('sp_hide_banned', true);
@@ -100,12 +100,11 @@
     const t = $('#toast'); t.textContent = msg; t.hidden = false;
     clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 1800);
   }
-  // 禁用规则：干员的核心盟约全部被 ban 即禁用（附加盟约保不住它）；
-  // 没有核心盟约的干员，所有附加盟约都被 ban 才禁用
+  // 禁用规则（与游戏一致）：只有核心盟约会被禁用；干员的核心盟约全部被禁用即离开本局，
+  // 附加盟约不影响；没有核心盟约的干员不会因禁用而离开
   const isBanned = op => {
     const core = op.pacts.filter(p => PACT[p]?.type === 'core');
-    const key = core.length ? core : op.pacts;
-    return key.length > 0 && key.every(p => state.bannedPacts.has(p));
+    return core.length > 0 && core.every(p => state.bannedPacts.has(p));
   };
   const picon = p => el('span', { class: `picon ${p.type}` }, img(pactIcon(p), p.name));
   const ptag = (name, hl) => {
@@ -316,7 +315,7 @@
     $('#ban-panel').hidden = !state.banMode;
     $('#btn-ban').classList.toggle('on', state.banMode);
     if (!state.banMode) return;
-    for (const type of ['core', 'extra']) {
+    for (const type of ['core']) {
       $(`#ban-${type}`).replaceChildren(...PACTS.filter(p => p.type === type).map(p => el('div', {
         class: 'pact-btn' + (state.bannedPacts.has(p.name) ? ' banned' : ''),
         onclick: () => {
