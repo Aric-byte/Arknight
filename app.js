@@ -100,7 +100,13 @@
     const t = $('#toast'); t.textContent = msg; t.hidden = false;
     clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 1800);
   }
-  const isBanned = op => op.pacts.length > 0 && op.pacts.every(p => state.bannedPacts.has(p));
+  // 禁用规则：干员的核心盟约全部被 ban 即禁用（附加盟约保不住它）；
+  // 没有核心盟约的干员，所有附加盟约都被 ban 才禁用
+  const isBanned = op => {
+    const core = op.pacts.filter(p => PACT[p]?.type === 'core');
+    const key = core.length ? core : op.pacts;
+    return key.length > 0 && key.every(p => state.bannedPacts.has(p));
+  };
   const picon = p => el('span', { class: `picon ${p.type}` }, img(pactIcon(p), p.name));
   const ptag = (name, hl) => {
     const p = PACT[name];
