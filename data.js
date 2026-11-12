@@ -75,7 +75,7 @@ window.SP_DATA = {
     3,
     6
    ],
-   "special": "bench",
+   "special": null,
    "icon": "kazimierzShip"
   },
   {

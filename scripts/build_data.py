@@ -16,7 +16,8 @@ for p in d['pacts']:
         p['thresholds'] = [1]; p['special'] = 'harmony'
     else:
         p['thresholds'] = [p['need']] + ([p['upgrade']] if p['upgrade'] else [])
-        p['special'] = 'bench' if '整备区' in p['effect'] else None
+        # 只有明确写了「整备区的【X】干员也可用于激活盟约」才算整备区计数（卡西米尔只是提到召唤整备区干员）
+        p['special'] = 'bench' if '整备区的【' + p['name'] + '】干员也可用于激活盟约' in p['effect'] else None
     p['icon'] = ICON[p['name']]
     p.pop('need'); p.pop('upgrade')
 src = '// 数据来源：PRTS Wiki「卫戍协议·规程/PRTS盟约记录」（文字 CC BY-NC-SA 3.0）\n'
