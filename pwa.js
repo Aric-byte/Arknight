@@ -38,6 +38,10 @@
       w.postMessage('skipWaiting');
     };
     if (reg.waiting) ask(reg.waiting);
+    // 页面/App 一直开着时也检查更新：切回前台时，以及每 30 分钟
+    const check = () => reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+    setInterval(check, 30 * 60 * 1000);
     reg.addEventListener('updatefound', () => {
       const w = reg.installing;
       w?.addEventListener('statechange', () => { if (w.state === 'installed') ask(w); });

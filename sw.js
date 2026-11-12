@@ -1,5 +1,5 @@
 // 由 scripts/build_pwa.py 生成，不要直接改 sw.js
-const VERSION = 'e7976ee08e';
+const VERSION = '4e5a99072d';
 const CACHE = 'guicheng-' + VERSION;
 const FONT_CACHE = 'guicheng-fonts';
 const FILES = [
