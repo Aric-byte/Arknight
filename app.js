@@ -102,6 +102,19 @@
   }
   // 禁用规则（与游戏一致）：只有核心盟约会被禁用；干员的核心盟约全部被禁用即离开本局，
   // 附加盟约不影响；没有核心盟约的干员不会因禁用而离开
+  // 变形同构体：与另一件特定装备同时携带时，携带者获得对应盟约（PRTS「变形同构体」天赋）
+  const MORPH = { '炎国短刀': '炎', '阿戈尔重刃': '阿戈尔', '萨尔贡浓茶': '萨尔贡', '伊比利亚骨刺刀': '伊比利亚', '莱塔尼亚小鼓': '莱塔尼亚',
+    '谢拉格不融冰': '谢拉格', '乌萨斯呼吸器': '乌萨斯', '卡西米尔竞技旗': '卡西米尔', '叙拉古正装': '叙拉古', '精准狙击镜': '精准',
+    '突袭手雷': '突袭', '坚守盾牌': '坚守', '不屈弹射器': '不屈', '迅捷作战粮': '迅捷', '灵巧涡轮手套': '灵巧', '奥术法阵': '奥术', '聚合急救箱': '聚合' };
+  const morphPact = n => MORPH[n] || (n.includes('维式重锤') ? '维多利亚' : null);
+  const MORPH_EQ = '变形同构体';
+  // 装备额外给予的盟约（不含干员本来就有的）
+  const grantedPacts = o => {
+    const l = (state.equips[o.name] || []).map(x => x.n);
+    if (!l.includes(MORPH_EQ)) return [];
+    return [...new Set(l.map(morphPact).filter(p => p && PACT[p] && !o.pacts.includes(p)))];
+  };
+  const opPacts = o => { const g = grantedPacts(o); return g.length ? [...o.pacts, ...g] : o.pacts; };
   const isBanned = op => {
     const core = op.pacts.filter(p => PACT[p]?.type === 'core');
     return core.length > 0 && core.every(p => state.bannedPacts.has(p));
@@ -121,8 +134,8 @@
     const benchOps = state.bench.map(id => OPS[id]);
     const res = {};
     for (const p of PACTS) {
-      const members = fieldOps.filter(o => o.pacts.includes(p.name));
-      const benchMembers = p.special === 'bench' ? benchOps.filter(o => o.pacts.includes(p.name)) : [];
+      const members = fieldOps.filter(o => opPacts(o).includes(p.name));
+      const benchMembers = p.special === 'bench' ? benchOps.filter(o => opPacts(o).includes(p.name)) : [];
       res[p.name] = { pact: p, members, benchMembers, raw: members.length + benchMembers.length, bonus: 0 };
     }
     const elites = fieldOps.filter(o => state.elite.has(o.id));     // 绝技：场上精锐干员数
@@ -569,7 +582,7 @@
       el('div', { class: 'od-art' }, img(avatar(o), o.name), el('span', { class: 'tb', text: ROMAN[o.tier] })),
       el('div', { class: 'od-info' },
         el('div', { class: 'od-name', text: o.name }),
-        el('div', { class: 'ptags' }, o.pacts.map(p => ptag(p))),
+        el('div', { class: 'ptags' }, o.pacts.map(p => ptag(p)), grantedPacts(o).map(p => el('span', { class: 'granted', title: '由变形同构体获得' }, ptag(p, true)))),
         el('div', { class: 'trait', html: `<span class="ttype">${esc(o.traitType)}</span> ` + fmtTrait(elite && o.traitElite ? o.traitElite : o.trait) }))));
     body.append(el('div', { class: 'od-actions' },
       el('button', { class: 'btn small' + (elite ? ' on' : ''), text: elite ? '精锐 ✓' : '设为精锐', onclick: () => { elite ? state.elite.delete(id) : state.elite.add(id); commit(); openOperator(id); } }),
@@ -595,6 +608,13 @@
     }
     const combos = equipCombos(list);
     if (combos.length) body.append(el('p', { class: 'note', text: `两件装备同时持有，会组合为「${combos.join('」「')}」` }));
+    if (list.some(x => x.n === MORPH_EQ)) {
+      const g = grantedPacts(o), other = list.find(x => x.n !== MORPH_EQ);
+      const want = other && morphPact(other.n);
+      body.append(el('p', { class: 'note', text: g.length ? `变形同构体：该干员额外获得【${g.join('】【')}】盟约，已计入盟约人数`
+        : want ? `变形同构体：「${other.n}」对应【${want}】，该干员本来就有这个盟约，不重复计数`
+        : '变形同构体：再携带一件对应装备即可获得额外盟约（如「不屈弹射器」→【不屈】、「炎国短刀」→【炎】、「维式重锤」系列→【维多利亚】）' }));
+    }
     if (o.pacts.includes('维多利亚') && list.length) body.append(el('p', { class: 'hint', text: '携带装备的【维多利亚】干员可享受维多利亚盟约的伤害加成。' }));
     $('#modal-title').textContent = '干员详情'; $('#modal').hidden = false;
   }
